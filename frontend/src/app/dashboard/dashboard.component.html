@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <base href="/dashboard">
+</head>
+
+<body class="bg-light">
+    
+    <div class="container" *ngIf="gestor === false">
+        <div class="row" *ngFor="let atividade of atividades" style="margin-top: 3%;">
+            <div class="card text-center" style="border-color: dimgray;" >
+                <div class="card-header bg-dark">
+                    <p class="detalhes">{{atividade.nome}}</p>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">#{{atividade.id}} - {{atividade.titulo}}</h2>
+                    <p class="card-text">{{atividade.descricao}}</p>
+                    <div class="align-items-center">
+                        <form>
+                            
+                            <div style="display: inline-block;">
+                                <label for="estado">Status</label>
+                                <select id="estado" name="{{atividade.id}}"  class="form-select" [(ngModel)]="atividadeAux.status" style="width: 150px;">
+                                    <option value="fazer" >Fazer</option>
+                                    <option value="fazendo" >Fazendo</option>
+                                    <option value="pausada">Pausada</option>
+                                    <option value="concluida">Concluida</option>
+                                </select>
+                            </div>
+                            <div style="display: inline-block; margin-left: 5px;">
+                                <label for="estado">%</label>
+                                <select id="estado" name="{{atividade.id}}"  class="form-select" [(ngModel)]="atividadeAux.porcentagem" style="width: 80px;">
+                                    <option value="0%">0%</option>
+                                    <option value="25%">25%</option>
+                                    <option value="50%">50%</option>
+                                    <option value="75%">75%</option>
+                                    <option value="100%">100%</option>
+
+                                </select>
+                            </div>
+                            <div>
+                                <button class="btn btn-success" style="margin-top: 15px; margin-right: 5px; background-color: #9fe803 !important; color: black !important;" (click)="atualizarStatus(atividade.id); atualizarRecursos(idUsuario, atividadeAux.status);">Salvar</button>
+                            </div>
+                         </form>
+                         
+                    </div> 
+                </div>
+                
+                <div class="progress" style="margin: 10px 200px;" *ngIf="atividade.porcentagem == '0%'">
+                    <div class="progress-bar" role="progressbar" style="width: 0%; background-color: #9fe803;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress" style="margin: 10px 200px;" *ngIf="atividade.porcentagem == '25%'">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 25%; background-color: #9fe803;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress" style="margin: 10px 200px;" *ngIf="atividade.porcentagem == '50%'">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 50%; background-color: #9fe803;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress" style="margin: 10px 200px;" *ngIf="atividade.porcentagem == '75%'">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%; background-color: #9fe803;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress" style="margin: 10px 200px;" *ngIf="atividade.porcentagem == '100%'">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%; background-color: #9fe803;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="card-footer text-muted ">
+                    <p >status: {{atividade.status}}- {{atividade.porcentagem}}</p>
+                    <p >Inicio: {{atividade.dt_inicial}} &nbsp;&nbsp;&nbsp;&nbsp; Entrega: {{atividade.dt_entrega}}</p>
+                    <div *ngIf="validadeData(atividade.dt_entrega)<=3 && validadeData(atividade.dt_entrega)>=0 && atividade.status != 'concluida'">
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <strong>Atenção</strong> Seu prazo está próximo, evite atrasar as atividades!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div *ngIf="validadeData(atividade.dt_entrega)<0 && atividade.status != 'concluida'"> 
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Atenção</strong> Seu prazo esgotou, atividade atrasada! Entregue a atividade.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+
+
+    <div *ngIf="gestor === true">
+
+        <div class="d-flex justify-content-center" style="margin-top: 3%;">
+            <button class="btn btn-dark" (click)="enviarEmail()">Enviar Relatorio</button>
+        </div>
+        <div style="margin: 5%;">
+            
+            <div>
+                
+                <div style="width: 500px;display: inline-block; margin-right: 10rem;">
+                    <h1>Gráficos Donut</h1>
+                    <p>Utilize o gráfico ao lado para se informar sobre as situações das tarefas, fique por dentro da taxa de tarefas concluidas e tarefas paradas para avaliar o andamento do projeto. </p>
+                    <p>Curiosidade:</p>
+                    <p> É um tipo de gráfico, também muito utilizado, indicado para expressar uma relação de proporcionalidade, em que todos os dados somados compõem o todo de um dado aspecto da realidade.</p>
+                    
+
+                </div>
+                <div style="width: 500px; height: 500px; display: inline-block;">
+                    <app-donut-chart></app-donut-chart>
+                </div>
+            </div>
+
+            <div>
+                <h1 style="display: flex; justify-content: center;">Gráficos de coluna</h1>
+                <div>
+                    <p>Utilize o gráfico abaixo para avaliar os maiores contribuidores dos projetos, aqui consegue ver quem mais conclui atividades, e poderá salvar esse grafico para uma analise evolutiva</p>
+                    <p>Curiosidade:</p>
+                    <p> Juntamente aos gráficos em barra, são os mais utilizados. Indicam, geralmente, um dado quantitativo sobre diferentes variáveis, lugares ou setores e não dependem de proporções. Os dados são indicados na posição vertical, enquanto as divisões qualitativas apresentam-se na posição horizontal.</p>
+                    
+                </div>
+                <div>
+                    <app-bar-chart></app-bar-chart>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+
+</body>
+
+</html>
